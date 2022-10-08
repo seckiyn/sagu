@@ -3,12 +3,16 @@ from typing import List, Union
 from dataclasses import dataclass
 from sys import exit
 
+AST_COUNT = 0
 # AST NODES
+
+AST_COUNT += 1
 @dataclass
 class AST:
     """ Main AST class """
     pass
 
+AST_COUNT += 1
 @dataclass
 class BinOp(AST):
     """
@@ -22,15 +26,18 @@ class BinOp(AST):
     op_token: Union[AST, TokenType]
     right_token: Union[AST, TokenType]
 
+AST_COUNT += 1
 @dataclass
 class UnaryOp(AST):
     op_token: Union[AST, TokenType]
     right_token: Union[AST, TokenType]
 
+AST_COUNT += 1
 @dataclass
 class Integer(AST):
     token: Union[AST, TokenType]
 
+AST_COUNT += 1
 @dataclass
 class Void(AST):
     pass
