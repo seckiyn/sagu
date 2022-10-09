@@ -86,7 +86,7 @@ def test_lexer_tokens():
     parse(string)
 
     # Test elif flow
-    string = "var hesa = true var mustafa = false if hesa {var a = 12} elif mustafa {var b= 23}"
+    string = "var hesa = true var mustafa = false if hesa {var a = 12} elseif mustafa {var b= 23}"
     print_info(f"Testing string({string})")
     parse(string)
 
@@ -97,6 +97,11 @@ def test_lexer_tokens():
 
     # Function declaration
     string = "func name (a, b) {var a = 12}"
+    print_info(f"Testing string({string})")
+    parse(string)
+
+    # Function call
+    string = "func name (a, b) {var a = 12} name(12 + 23, true)"
     print_info(f"Testing string({string})")
     parse(string)
 if __name__ == "__main__":

@@ -91,8 +91,13 @@ class FunctionDecl(AST):
     function_variables: AST
     function_block: Block
 
+AST_COUNT += 1
+@dataclass
+class FunctionCall(AST):
+    function_name: AST
+    function_variables: AST
 
-assert AST_COUNT == 13, f"You forgot to handle an AST {AST_COUNT}"
+assert AST_COUNT == 14, f"You forgot to handle an AST {AST_COUNT}"
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -112,6 +117,11 @@ class Parser:
             self.next_token()
         else:
             self.error(f"Unexpected token ({self.current_token}) expected ({token_type})")
+    def peek(self):
+        position = self.position + 1
+        if position < len(self.tokens):
+            return self.tokens[position]
+        return None
     def get_ast_list(self):
         ast_list = list()
         while self.current_token.token_value and self.current_token.token_type in (
@@ -119,7 +129,8 @@ class Parser:
                 TokenType.BLOCK_START,
                 TokenType.SETVAR,
                 TokenType.IF,
-                TokenType.FUNC
+                TokenType.FUNC,
+                TokenType.WORD
                 ):
 
             if self.current_token.token_type == TokenType.SETVAR:
@@ -130,6 +141,8 @@ class Parser:
                 ast_list.append(self.flow())
             elif self.current_token.token_type == TokenType.FUNC:
                 ast_list.append(self.function_decl())
+            elif self.current_token.token_type == TokenType.WORD:
+                ast_list.append(self.function_call())
             else:
                 self.error(f"There's something wrong {self.current_token}")
         return ast_list
@@ -138,6 +151,31 @@ class Parser:
         self.eat(TokenType.FUNC)
         function_name = self.current_token
         self.eat(TokenType.WORD)
+        function_variables = self.variable_bundle()
+        function_block = self.block()
+        function = FunctionDecl(function_name, function_variables, function_block)
+        return function
+    def function_call(self):
+        function_name = self.current_token
+        self.eat(TokenType.WORD)
+        function_variables = list()
+        self.eat(TokenType.LPAREN)
+        expr = (TokenType.INTEGER,
+                TokenType.LPAREN,
+                TokenType.PLUS,
+                TokenType.MINUS,
+                TokenType.TRUE,
+                TokenType.FALSE)
+        if self.current_token.token_type in expr:
+            function_variables.append(self.expr())
+        while self.current_token.token_type == TokenType.SEP:
+            self.eat(TokenType.SEP)
+            function_variables.append(self.expr())
+        self.eat(TokenType.RPAREN)
+        print_done(function_variables)
+        function_call = FunctionCall(function_name, function_variables)
+        return function_call
+    def variable_bundle(self):
         function_variables = list()
         self.eat(TokenType.LPAREN)
         if self.current_token.token_type == TokenType.WORD:
@@ -150,9 +188,7 @@ class Parser:
             self.eat(TokenType.WORD)
             function_variables.append(token)
         self.eat(TokenType.RPAREN)
-        function_block = self.block()
-        function = FunctionDecl(function_name, function_variables, function_block)
-        return function
+        return function_variables
     def flow(self):
         self.eat(TokenType.IF)
         if_expr = self.expr()

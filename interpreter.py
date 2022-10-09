@@ -3,12 +3,15 @@ from parser import AST_COUNT
 from logs import *
 class Walker:
     def walk(self, ast):
+        print_done("AST:", ast)
+        if ast is None:
+            print_done("="*100)
         ast_name = "walk_" + type(ast).__name__
         print(ast_name)
         func = getattr(self, ast_name)
         return func(ast)
 
-assert AST_COUNT == 13, "You've forgotten to interpret an AST"
+assert AST_COUNT == 14, "You've forgotten to interpret an AST"
 class Interpreter(Walker):
     def __init__(self, ast):
         self.ast = ast
@@ -98,6 +101,18 @@ class Interpreter(Walker):
         function_variables = ast.function_variables
         function_block = ast.function_block
         self.functions[function_name] = ast
-
-
+    def walk_FunctionCall(self, ast):
+        # TODO: Find a better way to call functions
+        function_name = ast.function_name.token_value
+        function_variables = ast.function_variables
+        function = self.functions[function_name]
+        function_block = function.function_block
+        function_variable_places = [place.token_value for place in function.function_variables]
+        print_error("Funciton variables:", function_variable_places)
+        variables = dict()
+        for var_name, var_value in zip(function_variable_places, function_variables):
+            variables[var_name] = self.walk(var_value)
+        new_interpreter = Interpreter(function_block)
+        new_interpreter.global_variables = variables
+        return new_interpreter.interpret()
 

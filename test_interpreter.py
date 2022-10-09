@@ -98,7 +98,7 @@ def test_interpreter_tokens():
     interpret(string)
 
     # Test elif flow
-    string = "var hesa = true var mustafa = false if hesa {var a = 12} elif mustafa {var b= 23}"
+    string = "var hesa = true var mustafa = false if hesa {var a = 12} elseif mustafa {var b= 23}"
     print_info(f"Testing string({string})")
     interpret(string)
 
@@ -109,6 +109,11 @@ def test_interpreter_tokens():
 
     # Function declaration
     string = "func hesa (a, b) {var a = 12}"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Function call
+    string = "func lessthan (a, b) {var newxless = a < b} lessthan(12 + 23, 1)"
     print_info(f"Testing string({string})")
     interpret(string)
 
