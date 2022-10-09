@@ -1,7 +1,7 @@
 import pytest
 from typing import List
 from lexer import Token, Lexer
-from logs import print_info, print_debug
+from logs import print_info, print_debug, print_error
 from parser import Parser
 from interpreter import Interpreter
 
@@ -16,17 +16,16 @@ def lex_to_tokens(text) -> List[Token]:
 
 def interpret(string):
     tokens = lex_to_tokens(string)
+    print_error(tokens)
     parser = Parser(tokens)
-    parsed = parser.parse()
-    interpreter = Interpreter(parsed)
+    interpreter = Interpreter(parser.parse())
     print_info(interpreter.interpret())
 
 def test_interpreter_tokens():
     # No input empty string
     string = ""
     print_info("Testing empty("") string")
-    with pytest.raises(Exception):
-        interpret(string)
+    interpret(string)
 
     # Test integer
     string = "123"
@@ -53,5 +52,59 @@ def test_interpreter_tokens():
     string = "-1 + +2"
     interpret(string)
 
+    # Test SETVAR and WORD
+    string = "var hesa = 1"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test equals sign
+    string = "var hesa = 12 + 21"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test block start and end
+    string = "{var hesa = 12 + 21}"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test variable math
+    string = "{var hesa = 12 + 21 var mustafa = 12 var hello = 2 * hesa + mustafa}"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test logical math
+    string = "var hesa = 12 == 12"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test less than logical operator
+    string = "var hesa = 12 < 12"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test less than logical operator
+    string = "var hesa = 12 > 12"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test math ops with logical operators
+    string = "var hesa = 3 * true + false"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test control flow
+    string = "var hesa = true if hesa {var a = 12}"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test elif flow
+    string = "var hesa = true var mustafa = false if hesa {var a = 12} elif mustafa {var b= 23}"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test else flow
+    string = "var hesa = false if hesa {var a = 12} else {var b = 23}"
+    print_info(f"Testing string({string})")
+    interpret(string)
 if __name__ == "__main__":
     test_interpreter_tokens()

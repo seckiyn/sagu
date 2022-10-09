@@ -2,6 +2,8 @@ from lexer import TokenType, Token
 from typing import List, Union
 from dataclasses import dataclass
 from sys import exit
+from logs import *
+
 
 AST_COUNT = 0
 # AST NODES
@@ -21,6 +23,7 @@ class BinOp(AST):
             MINUS
             MUL
             DIV
+            LOGICAL_OPERATORS
     """
     left_token: Union[AST, TokenType]
     op_token: Union[AST, TokenType]
@@ -42,6 +45,47 @@ AST_COUNT += 1
 class Void(AST):
     pass
 
+AST_COUNT += 1
+@dataclass
+class SetVariable(AST):
+    token: Token
+    expr: AST
+
+AST_COUNT += 1
+@dataclass
+class Variable(AST):
+    token: Token
+
+AST_COUNT += 1
+@dataclass
+class Block(AST):
+    ast_list: List[AST]
+
+AST_COUNT += 1
+@dataclass
+class Program(AST):
+    ast_list: List[AST]
+
+AST_COUNT += 1
+@dataclass
+class Bool(AST):
+    token: Token
+
+AST_COUNT += 1
+@dataclass
+class Condition(AST):
+    condition_expr: AST
+    condition_block: Block
+
+AST_COUNT += 1
+@dataclass
+class Flow(AST):
+    if_condition: Condition
+    elseif: List[AST]
+    else_block: AST
+
+
+assert AST_COUNT == 12, f"You forgot to handle an AST {AST_COUNT}"
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -51,15 +95,85 @@ class Parser:
     def error(self, text, *args, **kwargs):
         raise Exception(text, *args, **kwargs)
     def parse(self):
-        return self.expr()
+        return self.program()
     def next_token(self):
         self.position += 1
         self.current_token = self.tokens[self.position]
     def eat(self, token_type: TokenType):
+        print(self.current_token)
         if self.current_token.token_type == token_type:
             self.next_token()
         else:
             self.error(f"Unexpected token ({self.current_token}) expected ({token_type})")
+    def get_ast_list(self):
+        ast_list = list()
+        while self.current_token.token_value and self.current_token.token_type in (
+                TokenType.BLOCK_START,
+                TokenType.SETVAR,
+                TokenType.IF
+                ):
+
+            if self.current_token.token_type == TokenType.SETVAR:
+                ast_list.append(self.variable())
+            elif self.current_token.token_type == TokenType.BLOCK_START:
+                ast_list.append(self.block())
+            elif self.current_token.token_type == TokenType.IF:
+                ast_list.append(self.flow())
+            else:
+                self.error(f"There's something wrong {self.current_token}")
+        return ast_list
+
+    def flow(self):
+        self.eat(TokenType.IF)
+        if_expr = self.expr()
+        if_block = self.block()
+        # First condition of flow
+        if_condition = Condition(if_expr, if_block)
+        # Second condition of flow
+        elseif_condition_list = list()
+        while self.current_token.token_type == TokenType.ELSEIF:
+            self.eat(TokenType.ELSEIF)
+            elseif_expr = self.expr()
+            elseif_block = self.block()
+            elseif_condition = Condition(elseif_expr, elseif_block)
+            elseif_condition_list.append(elseif_condition)
+        # Third condition of flow
+        else_condition = Condition(Bool(Token(TokenType.TRUE, "true")), Void())
+        if self.current_token.token_type == TokenType.ELSE:
+            self.eat(TokenType.ELSE)
+            else_expr = Bool(Token(TokenType.TRUE, "true"))
+            else_block = self.block()
+            else_condition = Condition(else_expr, else_block)
+        return Flow(if_condition, elseif_condition_list, else_condition)
+    def program(self):
+        ast_list = self.get_ast_list()
+        return Program(ast_list)
+    def block(self):
+        self.eat(TokenType.BLOCK_START)
+        ast_list = self.get_ast_list()
+        self.eat(TokenType.BLOCK_END)
+        return Block(ast_list)
+    def variable(self):
+        self.eat(TokenType.SETVAR)
+        variable_name = self.current_token
+        self.eat(TokenType.WORD)
+        self.eat(TokenType.SET)
+        variable_set = self.logical()
+        return SetVariable(variable_name, variable_set)
+    def logical(self):
+        node = self.expr()
+        print_error(self.current_token)
+        while self.current_token.token_type in (TokenType.EQUALS, TokenType.LTHAN, TokenType.GTHAN):
+            print_error("LOGICAL")
+            token = self.current_token
+            if token.token_type == TokenType.EQUALS:
+                self.eat(TokenType.EQUALS)
+            if token.token_type == TokenType.LTHAN:
+                self.eat(TokenType.LTHAN)
+            if token.token_type == TokenType.GTHAN:
+                self.eat(TokenType.GTHAN)
+            node = BinOp(node, token, self.expr())
+        return node
     def expr(self):
         node = self.term()
         while self.current_token.token_type in (TokenType.PLUS, TokenType.MINUS):
@@ -81,6 +195,7 @@ class Parser:
             node = BinOp(node, token, self.factor())
         return node
     def factor(self):
+        print("FACTOR", self.current_token)
         if self.current_token.token_type == TokenType.INTEGER:
             token = self.current_token
             self.eat(TokenType.INTEGER)
@@ -99,7 +214,19 @@ class Parser:
             node = self.expr()
             self.eat(TokenType.RPAREN)
             return node
+        if self.current_token.token_type in (TokenType.WORD, TokenType.TRUE, TokenType.FALSE):
+            return self.get_variable()
         if self.current_token.token_type == TokenType.EOF:
-            self.error("This is a empty string")
+            self.error(f"This is a empty string, current_token: {self.current_token}")
         self.error(f"Unreachable token {self.current_token}")
+    def get_variable(self):
+        token = self.current_token
+        if token.token_type == TokenType.TRUE:
+            self.eat(TokenType.TRUE)
+            return Bool(token)
+        if token.token_type == TokenType.FALSE:
+            self.eat(TokenType.FALSE)
+            return Bool(token)
+        self.eat(TokenType.WORD)
+        return Variable(token)
 
