@@ -89,6 +89,11 @@ def test_lexer_tokens():
     print_info(f"Testing string({string})")
     tokenize(string)
 
+    # Function declaration
+    string = "func name (a, b) {var a = a + 12}"
+    print_info(f"Testing string({string})")
+    tokenize(string)
+
 
 
 

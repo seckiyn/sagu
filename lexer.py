@@ -39,6 +39,10 @@ class TokenType(Enum):
     ELSEIF = auto()
     ELSE = auto()
 
+    # Functions
+    FUNC = auto()
+    SEP = auto()
+
 
 
 @dataclass
@@ -56,7 +60,8 @@ BUILT_IN_WORDS = {
         "false"  : TokenType.FALSE,
         "if"     : TokenType.IF,
         "elseif" : TokenType.ELSEIF,
-        "else"   : TokenType.ELSE
+        "else"   : TokenType.ELSE,
+        "func"   : TokenType.FUNC
     }
 DIGITS = "1234567890"
 IGNORE_CHARACTERS = "\n "
@@ -155,14 +160,14 @@ class Lexer:
             self.advance()
         token_type = TokenType.WORD
 
-        assert len(BUILT_IN_WORDS) == 6, "You've forgotten to lex a new builtin word"
+        assert len(BUILT_IN_WORDS) == 7, "You've forgotten to lex a new builtin word"
         if word in BUILT_IN_WORDS:
             token_type = BUILT_IN_WORDS[word]
 
         return Token(token_type, word)
     def get_next_token(self):
         """Returns the next token from string"""
-        assert len(TokenType) == 21, "You forgot to implement a token"
+        assert len(TokenType) == 23, "You forgot to implement a token"
         while self.current_char:
             if self.current_char in DIGITS:
                 token_type = TokenType.INTEGER
@@ -223,6 +228,13 @@ class Lexer:
             if self.current_char == "}":
                 token_type = TokenType.BLOCK_END
                 token_value = "}"
+                token = Token(token_type, token_value)
+                self.advance()
+                return token
+
+            if self.current_char == ",":
+                token_type = TokenType.SEP
+                token_value = ","
                 token = Token(token_type, token_value)
                 self.advance()
                 return token

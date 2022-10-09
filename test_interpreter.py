@@ -106,5 +106,11 @@ def test_interpreter_tokens():
     string = "var hesa = false if hesa {var a = 12} else {var b = 23}"
     print_info(f"Testing string({string})")
     interpret(string)
+
+    # Function declaration
+    string = "func hesa (a, b) {var a = 12}"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
 if __name__ == "__main__":
     test_interpreter_tokens()

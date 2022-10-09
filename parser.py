@@ -84,8 +84,15 @@ class Flow(AST):
     elseif: List[AST]
     else_block: AST
 
+AST_COUNT += 1
+@dataclass
+class FunctionDecl(AST):
+    function_name: AST
+    function_variables: AST
+    function_block: Block
 
-assert AST_COUNT == 12, f"You forgot to handle an AST {AST_COUNT}"
+
+assert AST_COUNT == 13, f"You forgot to handle an AST {AST_COUNT}"
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -108,9 +115,11 @@ class Parser:
     def get_ast_list(self):
         ast_list = list()
         while self.current_token.token_value and self.current_token.token_type in (
+                # AST List
                 TokenType.BLOCK_START,
                 TokenType.SETVAR,
-                TokenType.IF
+                TokenType.IF,
+                TokenType.FUNC
                 ):
 
             if self.current_token.token_type == TokenType.SETVAR:
@@ -119,10 +128,31 @@ class Parser:
                 ast_list.append(self.block())
             elif self.current_token.token_type == TokenType.IF:
                 ast_list.append(self.flow())
+            elif self.current_token.token_type == TokenType.FUNC:
+                ast_list.append(self.function_decl())
             else:
                 self.error(f"There's something wrong {self.current_token}")
         return ast_list
 
+    def function_decl(self):
+        self.eat(TokenType.FUNC)
+        function_name = self.current_token
+        self.eat(TokenType.WORD)
+        function_variables = list()
+        self.eat(TokenType.LPAREN)
+        if self.current_token.token_type == TokenType.WORD:
+            token = self.current_token
+            self.eat(TokenType.WORD)
+            function_variables.append(token)
+        while self.current_token.token_type == TokenType.SEP:
+            self.eat(TokenType.SEP)
+            token = self.current_token
+            self.eat(TokenType.WORD)
+            function_variables.append(token)
+        self.eat(TokenType.RPAREN)
+        function_block = self.block()
+        function = FunctionDecl(function_name, function_variables, function_block)
+        return function
     def flow(self):
         self.eat(TokenType.IF)
         if_expr = self.expr()

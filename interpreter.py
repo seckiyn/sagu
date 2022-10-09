@@ -8,17 +8,19 @@ class Walker:
         func = getattr(self, ast_name)
         return func(ast)
 
-assert AST_COUNT == 12, "You've forgotten to interpret an AST"
+assert AST_COUNT == 13, "You've forgotten to interpret an AST"
 class Interpreter(Walker):
     def __init__(self, ast):
         self.ast = ast
         self.global_variables = dict()
+        self.functions = dict()
         print_info(self.ast)
     def error(self, text):
         raise Exception(text)
     def interpret(self):
         walked = self.walk(self.ast)
         print(self.global_variables)
+        print(self.functions)
         return walked
     def walk_Integer(self, ast):
         return ast.token_value
@@ -91,5 +93,11 @@ class Interpreter(Walker):
         print("="*20 , ast.condition_expr)
         if self.walk(ast.condition_expr):
             self.walk(ast.condition_block)
+    def walk_FunctionDecl(self, ast):
+        function_name = ast.function_name.token_value
+        function_variables = ast.function_variables
+        function_block = ast.function_block
+        self.functions[function_name] = ast
+
 
 

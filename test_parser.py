@@ -94,5 +94,10 @@ def test_lexer_tokens():
     string = "if hesa {var a = 12} else {var b = 23}"
     print_info(f"Testing string({string})")
     parse(string)
+
+    # Function declaration
+    string = "func name (a, b) {var a = 12}"
+    print_info(f"Testing string({string})")
+    parse(string)
 if __name__ == "__main__":
     test_lexer_tokens()
