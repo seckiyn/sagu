@@ -1,6 +1,24 @@
-function fib(times){
-    var first = 0
-    var second = 0
-    var third = first + second
-
+func fib(times){
+    var third = 1
+    if times == 1 {
+        var third = 1
+    }
+    if times == 2 {
+        var third = 1
+    }
+    var first = 1
+    var second = 1
+    var times = times - 2
+    var counter = 1
+    while counter < times+1 {
+        var third = first + second
+        var first = second
+        var second = third
+        var counter = counter + 1
+    }
+    return third
 }
+
+var justone = fib(1)
+var justtwo = fib(2)
+var bigone  = fib(1000)

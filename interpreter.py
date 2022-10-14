@@ -1,13 +1,14 @@
 from lexer import TokenType
 from parser import AST_COUNT
 from logs import *
+import logs
 class Walker:
     def walk(self, ast):
         print_done("AST:", ast)
         if ast is None:
-            print_done("="*100)
+            if logs.DEBUG: print_done("="*100)
         ast_name = "walk_" + type(ast).__name__
-        print(ast_name)
+        if logs.DEBUG: print(ast_name)
         func = getattr(self, ast_name)
         return func(ast)
 
@@ -23,8 +24,8 @@ class Interpreter(Walker):
         raise Exception(text)
     def interpret(self):
         walked = self.walk(self.ast)
-        print(self.global_variables)
-        print(self.functions)
+        print("Variables:", self.global_variables)
+        print("Functions:", self.functions.keys())
         return self.to_return
     def walk_Integer(self, ast):
         return ast.token_value
@@ -94,7 +95,7 @@ class Interpreter(Walker):
         if not if_condition and not elseif_condition:
             self.walk(ast.else_block)
     def walk_Condition(self, ast):
-        print("="*20 , ast.condition_expr)
+        if logs.DEBUG: print("="*20 , ast.condition_expr)
         if self.walk(ast.condition_expr):
             self.walk(ast.condition_block)
     def walk_FunctionDecl(self, ast):

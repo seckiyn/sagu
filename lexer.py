@@ -5,6 +5,7 @@ from enum import Enum, auto
 from dataclasses import dataclass
 from typing import Union
 
+
 class TokenType(Enum):
     """
         An enumeration for tokens
@@ -48,7 +49,6 @@ class TokenType(Enum):
     WHILE = auto()
 
 
-
 @dataclass
 class Token:
     """
@@ -59,15 +59,15 @@ class Token:
 
 
 BUILT_IN_WORDS = {
-        "var"    : TokenType.SETVAR,
-        "true"   : TokenType.TRUE,
-        "false"  : TokenType.FALSE,
-        "if"     : TokenType.IF,
-        "elseif" : TokenType.ELSEIF,
-        "else"   : TokenType.ELSE,
-        "func"   : TokenType.FUNC,
-        "return" : TokenType.RETURN,
-        "while"  : TokenType.WHILE
+        "var": TokenType.SETVAR,
+        "true": TokenType.TRUE,
+        "false": TokenType.FALSE,
+        "if": TokenType.IF,
+        "elseif": TokenType.ELSEIF,
+        "else": TokenType.ELSE,
+        "func" : TokenType.FUNC,
+        "return": TokenType.RETURN,
+        "while": TokenType.WHILE
     }
 DIGITS = "1234567890"
 IGNORE_CHARACTERS = "\n "

@@ -24,7 +24,7 @@ def interpret(string):
     tokens = lex_to_tokens(string)
     parser = Parser(tokens)
     interpreter = Interpreter(parser.parse())
-    print_info(interpreter.interpret())
+    interpreter.interpret()
 
 PATH = "."
 def usage():

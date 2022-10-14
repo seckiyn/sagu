@@ -3,6 +3,7 @@ from typing import List, Union
 from dataclasses import dataclass
 from sys import exit
 from logs import *
+import logs
 
 
 AST_COUNT = 0
@@ -112,9 +113,9 @@ assert AST_COUNT == 16, f"You forgot to handle an AST {AST_COUNT}"
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
-        print("="*200)
-        print(*self.tokens, sep="\n")
-        print("="*200)
+        if logs.DEBUG: print("="*200)
+        if logs.DEBUG: print(*self.tokens, sep="\n")
+        if logs.DEBUG: print("="*200)
         self.position = -1
         self.current_token = None
         self.next_token()
@@ -129,7 +130,7 @@ class Parser:
 
         self.current_token = self.tokens[self.position]
     def eat(self, token_type: TokenType):
-        print(self.current_token)
+        if logs.DEBUG: print(self.current_token)
         if self.current_token.token_type == token_type:
             self.next_token()
         else:
@@ -226,7 +227,7 @@ class Parser:
         return function_variables
     def flow(self):
         self.eat(TokenType.IF)
-        if_expr = self.expr()
+        if_expr = self.logical()
         if_block = self.block()
         # First condition of flow
         if_condition = Condition(if_expr, if_block)
@@ -296,7 +297,7 @@ class Parser:
             node = BinOp(node, token, self.factor())
         return node
     def factor(self):
-        print("FACTOR", self.current_token)
+        if logs.DEBUG: print("FACTOR", self.current_token)
         if self.current_token.token_type == TokenType.INTEGER:
             token = self.current_token
             self.eat(TokenType.INTEGER)
