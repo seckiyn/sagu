@@ -31,13 +31,6 @@ else {
     var block = 45
 }
 
-## Functions
-
-func (VARIABLES) {
-    BLOCK
-    return SOMETHING
-}
-
 ## While Loops
 
 while condition {
