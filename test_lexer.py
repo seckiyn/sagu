@@ -1,13 +1,15 @@
 from typing import List
-from lexer import Token, Lexer
+from lexer import Token, Lexer, TokenType
 from logs import print_info
 def lex_to_tokens(text) -> List[Token]:
     lexer = Lexer(text)
     token = lexer.get_next_token()
+    print(token)
     tokens = list()
-    while token.token_value:
+    while token.token_type != TokenType.EOF:
         tokens.append(token)
         token = lexer.get_next_token()
+        print(token)
     return tokens
 
 def tokenize(string):
@@ -104,6 +106,27 @@ def test_lexer_tokens():
     print_info(f"Testing string({string})")
     tokenize(string)
 
+    # While loops
+    string = "while true { var a = 12 }"
+    print_info(f"Testing string({string})")
+    tokenize(string)
+
+    string =\
+"""
+    func fib(count)
+        {
+            var sum = 0
+            var counter = 0
+
+
+            while counter < count
+            {
+                var sum = counter + sum
+            }
+        }
+"""
+    print_info(f"Testing string({string})")
+    tokenize(string)
 
 
 

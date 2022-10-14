@@ -1,19 +1,22 @@
 import pytest
 from typing import List
-from lexer import Token, Lexer
+from lexer import Token, Lexer, TokenType
 from logs import print_info, print_debug
 from parser import Parser
 def lex_to_tokens(text) -> List[Token]:
     lexer = Lexer(text)
     token = lexer.get_next_token()
     tokens = list([token])
-    while token.token_value:
+    while token.token_type != TokenType.EOF:
         token = lexer.get_next_token()
         tokens.append(token)
     return tokens
 
 def parse(string):
     tokens = lex_to_tokens(string)
+    print("-"*200)
+    print(*tokens, sep="\n")
+    print("-"*200)
     parser = Parser(tokens)
     parsed = parser.parse()
     print_debug(parsed)
@@ -112,6 +115,21 @@ def test_lexer_tokens():
 
     # Function returns
     string = "func hesa (a, b) {var a = 12 return a} var a = hesa(12 + 23, true)"
+    print_info(f"Testing string({string})")
+    parse(string)
+
+    # While loops
+    string =\
+"""func fib(count)
+        {
+            var sum = 0
+            var counter = 0
+            while counter < count
+            {
+                var sum = counter + sum
+            }
+        }
+"""
     print_info(f"Testing string({string})")
     parse(string)
 if __name__ == "__main__":

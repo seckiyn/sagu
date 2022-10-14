@@ -11,7 +11,7 @@ class Walker:
         func = getattr(self, ast_name)
         return func(ast)
 
-assert AST_COUNT == 15, "You've forgotten to interpret an AST"
+assert AST_COUNT == 16, "You've forgotten to interpret an AST"
 class Interpreter(Walker):
     def __init__(self, ast):
         self.ast = ast
@@ -118,4 +118,9 @@ class Interpreter(Walker):
         return new_interpreter.interpret()
     def walk_ReturnStatement(self, ast):
         self.to_return = self.walk(ast.expression)
+    def walk_While(self, ast):
+        expression = ast.expression
+        block = ast.block
+        while self.walk(expression):
+            self.walk(block)
 

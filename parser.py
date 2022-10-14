@@ -102,11 +102,19 @@ AST_COUNT += 1
 class ReturnStatement(AST):
     expression: AST
 
+AST_COUNT += 1
+@dataclass
+class While(AST):
+    expression: AST
+    block: Block
 
-assert AST_COUNT == 15, f"You forgot to handle an AST {AST_COUNT}"
+assert AST_COUNT == 16, f"You forgot to handle an AST {AST_COUNT}"
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
+        print("="*200)
+        print(*self.tokens, sep="\n")
+        print("="*200)
         self.position = -1
         self.current_token = None
         self.next_token()
@@ -116,6 +124,9 @@ class Parser:
         return self.program()
     def next_token(self):
         self.position += 1
+        if self.position >= len(self.tokens):
+            print_done(f"Tokens of these makes the wrong {self.tokens}")
+
         self.current_token = self.tokens[self.position]
     def eat(self, token_type: TokenType):
         print(self.current_token)
@@ -131,13 +142,15 @@ class Parser:
     def get_ast_list(self, isfunction=False):
         ast_list = list()
         while self.current_token.token_value and self.current_token.token_type in (
+                # ADD THE TOKENS THAT YOU WANT TO USE IN BLOCKS
                 # AST List
                 TokenType.BLOCK_START,
                 TokenType.SETVAR,
                 TokenType.IF,
                 TokenType.FUNC,
                 TokenType.WORD,
-                TokenType.RETURN
+                TokenType.RETURN,
+                TokenType.WHILE
                 ):
 
             if self.current_token.token_type == TokenType.SETVAR:
@@ -152,9 +165,16 @@ class Parser:
                 ast_list.append(self.function_call())
             elif self.current_token.token_type == TokenType.RETURN and isfunction:
                 ast_list.append(self.return_statement())
+            elif self.current_token.token_type == TokenType.WHILE:
+                ast_list.append(self.while_loop())
             else:
                 self.error(f"There's something wrong {self.current_token}")
         return ast_list
+    def while_loop(self):
+        self.eat(TokenType.WHILE)
+        expression = self.logical()
+        block = self.block()
+        return While(expression, block)
     def return_statement(self):
         self.eat(TokenType.RETURN)
         return_statement = self.logical()
@@ -173,12 +193,14 @@ class Parser:
         self.eat(TokenType.WORD)
         function_variables = list()
         self.eat(TokenType.LPAREN)
+        # THINGS THAT ALLOWED INSIDE A FUNCTION
         expr = (TokenType.INTEGER,
                 TokenType.LPAREN,
                 TokenType.PLUS,
                 TokenType.MINUS,
                 TokenType.TRUE,
-                TokenType.FALSE)
+                TokenType.FALSE,
+                TokenType.WORD)
         if self.current_token.token_type in expr:
             function_variables.append(self.expr())
         while self.current_token.token_type == TokenType.SEP:
