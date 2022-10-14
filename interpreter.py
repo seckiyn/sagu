@@ -11,20 +11,21 @@ class Walker:
         func = getattr(self, ast_name)
         return func(ast)
 
-assert AST_COUNT == 14, "You've forgotten to interpret an AST"
+assert AST_COUNT == 15, "You've forgotten to interpret an AST"
 class Interpreter(Walker):
     def __init__(self, ast):
         self.ast = ast
         self.global_variables = dict()
         self.functions = dict()
         print_info(self.ast)
+        self.to_return = None
     def error(self, text):
         raise Exception(text)
     def interpret(self):
         walked = self.walk(self.ast)
         print(self.global_variables)
         print(self.functions)
-        return walked
+        return self.to_return
     def walk_Integer(self, ast):
         return ast.token_value
     def walk_BinOp(self, ast):
@@ -115,4 +116,6 @@ class Interpreter(Walker):
         new_interpreter = Interpreter(function_block)
         new_interpreter.global_variables = variables
         return new_interpreter.interpret()
+    def walk_ReturnStatement(self, ast):
+        self.to_return = self.walk(ast.expression)
 

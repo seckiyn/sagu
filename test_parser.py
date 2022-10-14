@@ -104,5 +104,15 @@ def test_lexer_tokens():
     string = "func name (a, b) {var a = 12} name(12 + 23, true)"
     print_info(f"Testing string({string})")
     parse(string)
+
+    # Function call at logical
+    string = "func hesa (a, b) {var a = 12} var a = hesa(12 + 23, true)"
+    print_info(f"Testing string({string})")
+    parse(string)
+
+    # Function returns
+    string = "func hesa (a, b) {var a = 12 return a} var a = hesa(12 + 23, true)"
+    print_info(f"Testing string({string})")
+    parse(string)
 if __name__ == "__main__":
     test_lexer_tokens()

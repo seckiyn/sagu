@@ -1,0 +1,6 @@
+function fib(times){
+    var first = 0
+    var second = 0
+    var third = first + second
+
+}

@@ -94,6 +94,16 @@ def test_lexer_tokens():
     print_info(f"Testing string({string})")
     tokenize(string)
 
+    # Function call at logical
+    string = "func hesa (a, b) {var a = 12} var a = hesa(12 + 23, true)"
+    print_info(f"Testing string({string})")
+    tokenize(string)
+
+    # Function returns
+    string = "func hesa (a, b) {var a = 12 return a} var a = hesa(12 + 23, true)"
+    print_info(f"Testing string({string})")
+    tokenize(string)
+
 
 
 

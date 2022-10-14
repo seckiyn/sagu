@@ -117,5 +117,10 @@ def test_interpreter_tokens():
     print_info(f"Testing string({string})")
     interpret(string)
 
+    # Function call at logical
+    string = "func hesa (a, b) {var a = 12 return 12} var a = hesa(12 + 23, true)"
+    print_info(f"Testing string({string})")
+    interpret(string)
+
 if __name__ == "__main__":
     test_interpreter_tokens()

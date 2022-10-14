@@ -97,7 +97,13 @@ class FunctionCall(AST):
     function_name: AST
     function_variables: AST
 
-assert AST_COUNT == 14, f"You forgot to handle an AST {AST_COUNT}"
+AST_COUNT += 1
+@dataclass
+class ReturnStatement(AST):
+    expression: AST
+
+
+assert AST_COUNT == 15, f"You forgot to handle an AST {AST_COUNT}"
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -122,7 +128,7 @@ class Parser:
         if position < len(self.tokens):
             return self.tokens[position]
         return None
-    def get_ast_list(self):
+    def get_ast_list(self, isfunction=False):
         ast_list = list()
         while self.current_token.token_value and self.current_token.token_type in (
                 # AST List
@@ -130,7 +136,8 @@ class Parser:
                 TokenType.SETVAR,
                 TokenType.IF,
                 TokenType.FUNC,
-                TokenType.WORD
+                TokenType.WORD,
+                TokenType.RETURN
                 ):
 
             if self.current_token.token_type == TokenType.SETVAR:
@@ -143,16 +150,22 @@ class Parser:
                 ast_list.append(self.function_decl())
             elif self.current_token.token_type == TokenType.WORD:
                 ast_list.append(self.function_call())
+            elif self.current_token.token_type == TokenType.RETURN and isfunction:
+                ast_list.append(self.return_statement())
             else:
                 self.error(f"There's something wrong {self.current_token}")
         return ast_list
+    def return_statement(self):
+        self.eat(TokenType.RETURN)
+        return_statement = self.logical()
+        return ReturnStatement(return_statement)
 
     def function_decl(self):
         self.eat(TokenType.FUNC)
         function_name = self.current_token
         self.eat(TokenType.WORD)
         function_variables = self.variable_bundle()
-        function_block = self.block()
+        function_block = self.block(True)
         function = FunctionDecl(function_name, function_variables, function_block)
         return function
     def function_call(self):
@@ -214,9 +227,9 @@ class Parser:
     def program(self):
         ast_list = self.get_ast_list()
         return Program(ast_list)
-    def block(self):
+    def block(self, isfunction=False):
         self.eat(TokenType.BLOCK_START)
-        ast_list = self.get_ast_list()
+        ast_list = self.get_ast_list(isfunction)
         self.eat(TokenType.BLOCK_END)
         return Block(ast_list)
     def variable(self):
@@ -293,6 +306,8 @@ class Parser:
         if token.token_type == TokenType.FALSE:
             self.eat(TokenType.FALSE)
             return Bool(token)
+        if token.token_type == TokenType.WORD and self.peek().token_type == TokenType.LPAREN:
+            return self.function_call()
         self.eat(TokenType.WORD)
         return Variable(token)
 
