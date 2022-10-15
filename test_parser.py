@@ -132,5 +132,16 @@ def test_lexer_tokens():
 """
     print_info(f"Testing string({string})")
     parse(string)
+
+    # Test string literals
+    string = 'var a = "Hello World"'
+    print_info(f"Testing string({string})")
+    parse(string)
+
+    # Test if string literals able to plus minus etc. due to python 
+    string = 'var a = "Hello" == "Hello"'
+    print_info(f"Testing string({string})")
+    parse(string)
+
 if __name__ == "__main__":
     test_lexer_tokens()

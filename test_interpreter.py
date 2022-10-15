@@ -135,10 +135,22 @@ def test_interpreter_tokens():
             return sum
         }
 
-    var sum = sumn(sumn(sumn(10)))
+    var sum = sumn(10)
 """
     print_info(f"Testing string({string})")
     interpret(string)
+
+    # Test string literals
+    string = 'var a = "Hello World"'
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test if string literals able to plus minus etc. due to python 
+    string = 'var a = "Hello\n"+ "Hello"'
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+
 
 if __name__ == "__main__":
     test_interpreter_tokens()

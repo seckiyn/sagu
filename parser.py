@@ -109,7 +109,12 @@ class While(AST):
     expression: AST
     block: Block
 
-assert AST_COUNT == 16, f"You forgot to handle an AST {AST_COUNT}"
+AST_COUNT += 1
+@dataclass
+class String(AST):
+    token: AST
+
+assert AST_COUNT == 17, f"You forgot to handle an AST {AST_COUNT}"
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -318,6 +323,8 @@ class Parser:
             return node
         if self.current_token.token_type in (TokenType.WORD, TokenType.TRUE, TokenType.FALSE):
             return self.get_variable()
+        if self.current_token.token_type == TokenType.STRING_LITERAL:
+            return self.get_variable()
         if self.current_token.token_type == TokenType.EOF:
             self.error(f"This is a empty string, current_token: {self.current_token}")
         self.error(f"Unreachable token {self.current_token}")
@@ -331,6 +338,10 @@ class Parser:
             return Bool(token)
         if token.token_type == TokenType.WORD and self.peek().token_type == TokenType.LPAREN:
             return self.function_call()
+        if token.token_type == TokenType.STRING_LITERAL:
+            token = self.current_token
+            self.eat(TokenType.STRING_LITERAL)
+            return String(token)
         self.eat(TokenType.WORD)
         return Variable(token)
 

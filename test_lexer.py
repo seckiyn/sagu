@@ -128,6 +128,11 @@ def test_lexer_tokens():
     print_info(f"Testing string({string})")
     tokenize(string)
 
+    # Test string literals
+    string = 'var a = "Hello World"'
+    print_info(f"Testing string({string})")
+    tokenize(string)
+
 
 
 if __name__ == "__main__":

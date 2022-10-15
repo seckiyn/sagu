@@ -3,7 +3,7 @@
 """
 from colorama import Fore, init
 init(autoreset=True)
-DEBUG = False and True
+DEBUG = False or True
 
 
 def print_error(*args, **kwargs):

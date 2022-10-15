@@ -48,6 +48,9 @@ class TokenType(Enum):
     # Loops
     WHILE = auto()
 
+    # BUILT-IN DATA TYPES
+    STRING_LITERAL = auto()
+
 
 @dataclass
 class Token:
@@ -65,12 +68,14 @@ BUILT_IN_WORDS = {
         "if": TokenType.IF,
         "elseif": TokenType.ELSEIF,
         "else": TokenType.ELSE,
-        "func" : TokenType.FUNC,
+        "func": TokenType.FUNC,
         "return": TokenType.RETURN,
-        "while": TokenType.WHILE
+        "while": TokenType.WHILE,
     }
 DIGITS = "1234567890"
 IGNORE_CHARACTERS = "\n "
+
+
 class Lexer:
     """
         Main class to lexing
@@ -171,9 +176,23 @@ class Lexer:
             token_type = BUILT_IN_WORDS[word]
 
         return Token(token_type, word)
+    def get_string_literal(self):
+        self.advance() # Point after the quote
+        string = ""
+        while self.current_char and self.current_char != '"':
+            if self.current_char == "\\" and self.peek() == '"':
+                string += '"'
+                self.advance()
+                self.advance()
+                continue
+            string += self.current_char
+            self.advance()
+        string = string.encode().decode("unicode_escape")
+        return string
+
     def get_next_token(self):
         """Returns the next token from string"""
-        assert len(TokenType) == 25, "You forgot to implement a token"
+        assert len(TokenType) == 26, "You forgot to implement a token"
         while self.current_char:
             if self.current_char in DIGITS:
                 token_type = TokenType.INTEGER
@@ -243,6 +262,12 @@ class Lexer:
                 token_value = ","
                 token = Token(token_type, token_value)
                 self.advance()
+                return token
+            if self.current_char == '"':
+                token_type = TokenType.STRING_LITERAL
+                token_value = self.get_string_literal()
+                token = Token(token_type, token_value)
+                self.advance() #RETURN
                 return token
 
             if self.current_char in IGNORE_CHARACTERS:
