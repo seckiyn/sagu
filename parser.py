@@ -32,54 +32,89 @@ class BinOp(AST):
 AST_COUNT += 1
 @dataclass
 class UnaryOp(AST):
+    """
+        AST class for Unary Operations
+        op_token is PLUS or MINUS
+        right_token is an AST
+    """
     op_token: Union[AST, TokenType]
     right_token: Union[AST, TokenType]
 
 AST_COUNT += 1
 @dataclass
 class Integer(AST):
+    """
+        AST container for Integers
+    """
     token: Union[AST, TokenType]
 
 AST_COUNT += 1
 @dataclass
 class Void(AST):
+    """
+        AST for none
+    """
     pass
 
 AST_COUNT += 1
 @dataclass
 class SetVariable(AST):
+    """
+        AST variable for setting variables
+    """
     token: Token
     expr: AST
 
 AST_COUNT += 1
 @dataclass
 class Variable(AST):
+    """
+        AST for return variable
+    """
     token: Token
 
 AST_COUNT += 1
 @dataclass
 class Block(AST):
+    """
+        AST for blocks
+    """
     ast_list: List[AST]
 
 AST_COUNT += 1
 @dataclass
 class Program(AST):
+    """
+        AST class for whole program
+    """
     ast_list: List[AST]
 
 AST_COUNT += 1
 @dataclass
 class Bool(AST):
+    """
+        AST container for Boolean
+    """
     token: Token
 
 AST_COUNT += 1
 @dataclass
 class Condition(AST):
+    """
+        AST for conditions
+        lessthan
+        greaterthan
+        equals
+    """
     condition_expr: AST
     condition_block: Block
 
 AST_COUNT += 1
 @dataclass
 class Flow(AST):
+    """
+        AST for if elseif else statement
+    """
     if_condition: Condition
     elseif: List[AST]
     else_block: AST
@@ -87,6 +122,9 @@ class Flow(AST):
 AST_COUNT += 1
 @dataclass
 class FunctionDecl(AST):
+    """
+        AST for declaring functions
+    """
     function_name: AST
     function_variables: AST
     function_block: Block
@@ -94,57 +132,88 @@ class FunctionDecl(AST):
 AST_COUNT += 1
 @dataclass
 class FunctionCall(AST):
+    """
+        AST for calling function
+    """
     function_name: AST
     function_variables: AST
 
 AST_COUNT += 1
 @dataclass
 class ReturnStatement(AST):
+    """
+        AST for return statements in functions
+    """
     expression: AST
 
 AST_COUNT += 1
 @dataclass
 class While(AST):
+    """
+        AST for while loops
+    """
     expression: AST
     block: Block
 
 AST_COUNT += 1
 @dataclass
 class String(AST):
+    """
+        AST container string_literals
+    """
     token: AST
 
 assert AST_COUNT == 17, f"You forgot to handle an AST {AST_COUNT}"
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
-        if logs.DEBUG: print("="*200)
-        if logs.DEBUG: print(*self.tokens, sep="\n")
-        if logs.DEBUG: print("="*200)
+        print_debug("="*200)
+        print_debug(*self.tokens, sep="\n")
+        print_debug("="*200)
         self.position = -1
         self.current_token = None
         self.next_token()
     def error(self, text, *args, **kwargs):
+        """
+            Handle the errors
+        """
         raise Exception(text, *args, **kwargs)
     def parse(self):
+        """
+            Parse the whole self.text
+        """
         return self.program()
     def next_token(self):
+        """
+            advances and sets the current_token
+        """
         self.position += 1
         if self.position >= len(self.tokens):
             print_done(f"Tokens of these makes the wrong {self.tokens}")
 
         self.current_token = self.tokens[self.position]
     def eat(self, token_type: TokenType):
-        if logs.DEBUG: print(self.current_token)
+        """
+            Checks if given token is true and advances token
+            else gives and error
+        """
+        print_debug(self.current_token)
         if self.current_token.token_type == token_type:
             self.next_token()
         else:
             self.error(f"Unexpected token ({self.current_token}) expected ({token_type})")
     def peek(self):
+        """
+            Returns the next token without advancing
+        """
         position = self.position + 1
         if position < len(self.tokens):
             return self.tokens[position]
         return None
     def get_ast_list(self, isfunction=False):
+        """
+            Returns a bundle of AST's
+        """
         ast_list = list()
         while self.current_token.token_value and self.current_token.token_type in (
                 # ADD THE TOKENS THAT YOU WANT TO USE IN BLOCKS
@@ -176,16 +245,25 @@ class Parser:
                 self.error(f"There's something wrong {self.current_token}")
         return ast_list
     def while_loop(self):
+        """
+            Handles the WHILE token
+        """
         self.eat(TokenType.WHILE)
         expression = self.logical()
         block = self.block()
         return While(expression, block)
     def return_statement(self):
+        """
+            Handles the RETURN statement for functions
+        """
         self.eat(TokenType.RETURN)
         return_statement = self.logical()
         return ReturnStatement(return_statement)
 
     def function_decl(self):
+        """
+            Handles the function declaration
+        """
         self.eat(TokenType.FUNC)
         function_name = self.current_token
         self.eat(TokenType.WORD)
@@ -194,6 +272,9 @@ class Parser:
         function = FunctionDecl(function_name, function_variables, function_block)
         return function
     def function_call(self):
+        """
+            Handles the function call ast
+        """
         function_name = self.current_token
         self.eat(TokenType.WORD)
         function_variables = list()
@@ -217,6 +298,9 @@ class Parser:
         function_call = FunctionCall(function_name, function_variables)
         return function_call
     def variable_bundle(self):
+        """
+            Returns WORD's separeted with SEP(,)
+        """
         function_variables = list()
         self.eat(TokenType.LPAREN)
         if self.current_token.token_type == TokenType.WORD:
@@ -231,6 +315,9 @@ class Parser:
         self.eat(TokenType.RPAREN)
         return function_variables
     def flow(self):
+        """
+            Returns a Flow(if elseif else statement)
+        """
         self.eat(TokenType.IF)
         if_expr = self.logical()
         if_block = self.block()
@@ -349,8 +436,7 @@ class Parser:
             return self.get_variable()
         if self.current_token.token_type == TokenType.EOF:
             self.error(f"This is a empty string, current_token: {self.current_token}")
-        self.error(f"Unreachable token {self.current_token}")
-        return None
+        return self.error(f"Unreachable token {self.current_token}")
     def get_variable(self):
         """
             Last part of the logical returns
