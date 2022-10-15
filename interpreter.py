@@ -2,6 +2,26 @@ from lexer import TokenType
 from parser import AST_COUNT
 from logs import *
 import logs
+
+handle_function = 0
+
+handle_function += 1
+def handle_bin_print(*args):
+    print(*args)
+
+
+handle_function += 1
+def handle_bin_input(*args):
+    return input(*args)
+
+
+BUILT_IN_FUNCTIONS = {
+        "print" : handle_bin_print,
+        "input" : handle_bin_input
+        }
+
+assert handle_function == len(BUILT_IN_FUNCTIONS), "You forgot to write a handle_bin function for new BUILT_IN_FUNCTION"
+
 class Walker:
     def walk(self, ast):
         print_done("AST:", ast)
@@ -106,6 +126,12 @@ class Interpreter(Walker):
     def walk_FunctionCall(self, ast):
         # TODO: Find a better way to call functions
         function_name = ast.function_name.token_value
+        assert len(BUILT_IN_FUNCTIONS) == 2, "You forgot to handle the walk_FunctionCall for new BUILT_IN_FUNCTION"
+        if function_name in BUILT_IN_FUNCTIONS:
+            function_arguments = list()
+            for expr in ast.function_variables:
+                function_arguments.append(self.walk(expr))
+            return BUILT_IN_FUNCTIONS[function_name](*function_arguments)
         function_variables = ast.function_variables
         function = self.functions[function_name]
         function_block = function.function_block

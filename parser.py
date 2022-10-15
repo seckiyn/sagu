@@ -1,9 +1,8 @@
-from lexer import TokenType, Token
 from typing import List, Union
 from dataclasses import dataclass
-from sys import exit
-from logs import *
 import logs
+from logs import print_error, print_done, print_debug
+from lexer import TokenType, Token
 
 
 AST_COUNT = 0
@@ -206,7 +205,8 @@ class Parser:
                 TokenType.MINUS,
                 TokenType.TRUE,
                 TokenType.FALSE,
-                TokenType.WORD)
+                TokenType.WORD,
+                TokenType.STRING_LITERAL)
         if self.current_token.token_type in expr:
             function_variables.append(self.expr())
         while self.current_token.token_type == TokenType.SEP:
@@ -253,14 +253,24 @@ class Parser:
             else_condition = Condition(else_expr, else_block)
         return Flow(if_condition, elseif_condition_list, else_condition)
     def program(self):
+        """
+            Returns the whole program as Program
+        """
         ast_list = self.get_ast_list()
         return Program(ast_list)
     def block(self, isfunction=False):
+        """
+            Returns a block and if it's a function returns it with a
+            RETURN
+        """
         self.eat(TokenType.BLOCK_START)
         ast_list = self.get_ast_list(isfunction)
         self.eat(TokenType.BLOCK_END)
         return Block(ast_list)
     def variable(self):
+        """
+            Returns a WORD as variable
+        """
         self.eat(TokenType.SETVAR)
         variable_name = self.current_token
         self.eat(TokenType.WORD)
@@ -268,6 +278,9 @@ class Parser:
         variable_set = self.logical()
         return SetVariable(variable_name, variable_set)
     def logical(self):
+        """
+            Does the math and logical
+        """
         node = self.expr()
         print_error(self.current_token)
         while self.current_token.token_type in (TokenType.EQUALS, TokenType.LTHAN, TokenType.GTHAN):
@@ -282,6 +295,9 @@ class Parser:
             node = BinOp(node, token, self.expr())
         return node
     def expr(self):
+        """
+            Expr part of the logical
+        """
         node = self.term()
         while self.current_token.token_type in (TokenType.PLUS, TokenType.MINUS):
             token = self.current_token
@@ -292,6 +308,9 @@ class Parser:
             node = BinOp(node, token, self.factor())
         return node
     def term(self):
+        """
+            Term part of the logical
+        """
         node = self.factor()
         while self.current_token.token_type in (TokenType.MUL, TokenType.DIV):
             token = self.current_token
@@ -302,7 +321,10 @@ class Parser:
             node = BinOp(node, token, self.factor())
         return node
     def factor(self):
-        if logs.DEBUG: print("FACTOR", self.current_token)
+        """
+            Factor part of logical
+        """
+        print_debug("FACTOR", self.current_token)
         if self.current_token.token_type == TokenType.INTEGER:
             token = self.current_token
             self.eat(TokenType.INTEGER)
@@ -328,7 +350,16 @@ class Parser:
         if self.current_token.token_type == TokenType.EOF:
             self.error(f"This is a empty string, current_token: {self.current_token}")
         self.error(f"Unreachable token {self.current_token}")
+        return None
     def get_variable(self):
+        """
+            Last part of the logical returns
+            TRUE
+            FALSE
+            FUNCTION_CALL
+            STRING_LITERAL
+            VARIABLE
+        """
         token = self.current_token
         if token.token_type == TokenType.TRUE:
             self.eat(TokenType.TRUE)

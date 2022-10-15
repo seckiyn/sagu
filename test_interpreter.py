@@ -150,6 +150,16 @@ def test_interpreter_tokens():
     print_info(f"Testing string({string})")
     interpret(string)
 
+    # Test print built in function
+    string = 'print("Hello, World!")'
+    print_info(f"Testing string({string})")
+    interpret(string)
+
+    # Test input built in function
+    string = 'var a = input("What\'s your name") print("Hello", a)'
+    print_info(f"Testing string({string})")
+    interpret(string)
+
 
 
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
 """
+   ://github.com/python/typeshed
     A module to use logging and printing
 """
 from colorama import Fore, init
 init(autoreset=True)
-DEBUG = False or True
+DEBUG = False and True
 
 
 def print_error(*args, **kwargs):

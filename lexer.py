@@ -85,12 +85,14 @@ class Lexer:
         self.position = -1
         self.current_char = None
         self.advance()
+
     def error(self, text):
         """
             Raise error when necessary
         """
         position = self.position
         raise Exception(f"At position {position}" + text)
+
     def advance(self):
         """
             Advance the position and sets the new character
@@ -101,16 +103,22 @@ class Lexer:
             self.current_char = self.text[self.position]
         else:
             self.current_char = None
+
     def in_range(self):
         """
             Return if position in text range
         """
         return self.position < len(self.text)
+
     def peek(self):
+        """
+            Returns the next position char without advancing the pointer
+        """
         position = self.position + 1
         if self.position < len(self.text):
             return self.text[position]
         return None
+
     def get_integer(self):
         """
             Returns an integer from text
@@ -120,6 +128,7 @@ class Lexer:
             integer += self.current_char
             self.advance()
         return int(integer)
+
     def get_math_token(self):
         """
             Returns a token related to math exprs
@@ -161,6 +170,7 @@ class Lexer:
             self.advance()
             return token
         raise Exception("There's something really wrong")
+
     def get_word_token(self):
         """
             Returns a word or built-in word
@@ -171,13 +181,21 @@ class Lexer:
             self.advance()
         token_type = TokenType.WORD
 
-        assert len(BUILT_IN_WORDS) == 9, "You've forgotten to lex a new builtin word"
-        if word in BUILT_IN_WORDS:
-            token_type = BUILT_IN_WORDS[word]
+        assert len(BUILT_IN_WORDS) == 9, "You've forgotten to lex\
+                a new builtin word"
+        token_type = BUILT_IN_WORDS.get(word, token_type)
 
         return Token(token_type, word)
-    def get_string_literal(self):
-        self.advance() # Point after the quote
+
+    def get_string_literal(self) -> str:
+        """
+            Starts the pointer at quote and advances once
+            then advances and combines every thing until
+            it finds a quote that didn't have a backslash before
+            and returns the unicode_escaped value of this
+            string
+        """
+        self.advance()  # Point after the quote
         string = ""
         while self.current_char and self.current_char != '"':
             if self.current_char == "\\" and self.peek() == '"':
@@ -201,10 +219,10 @@ class Lexer:
                 # self.advance()
                 return token
             if self.current_char in "+-/*()":
-                """Mathematical tokens"""
+                # Mathematical tokens
                 return self.get_math_token()
             if self.current_char.isalnum():
-                """ Word tokens """
+                # Word tokens
                 return self.get_word_token()
             # Logical operators
             if self.current_char == "=" and self.peek() == "=":
@@ -267,7 +285,7 @@ class Lexer:
                 token_type = TokenType.STRING_LITERAL
                 token_value = self.get_string_literal()
                 token = Token(token_type, token_value)
-                self.advance() #RETURN
+                self.advance()  # RETURN
                 return token
 
             if self.current_char in IGNORE_CHARACTERS:
