@@ -5,6 +5,7 @@
 from colorama import Fore, init
 init(autoreset=True)
 DEBUG = False and True
+VERBOSITY = False
 
 
 def print_error(*args, **kwargs):

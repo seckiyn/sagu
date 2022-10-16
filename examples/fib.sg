@@ -22,3 +22,4 @@ func fib(times){
 var justone = fib(1)
 var justtwo = fib(2)
 var bigone  = fib(1000)
+print(bigone)

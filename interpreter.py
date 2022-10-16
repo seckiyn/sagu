@@ -26,7 +26,7 @@ class Walker:
     def walk(self, ast):
         print_done("AST:", ast)
         if ast is None:
-            if logs.DEBUG: print_done("="*100)
+            print_done("="*100)
         ast_name = "walk_" + type(ast).__name__
         if logs.DEBUG: print(ast_name)
         func = getattr(self, ast_name)
@@ -44,8 +44,9 @@ class Interpreter(Walker):
         raise Exception(text)
     def interpret(self):
         walked = self.walk(self.ast)
-        print("Variables:", self.global_variables)
-        print("Functions:", self.functions.keys())
+        if logs.VERBOSITY:
+            print("Variables:", self.global_variables)
+            print("Functions:", self.functions.keys())
         return self.to_return
     def walk_Integer(self, ast):
         return ast.token_value

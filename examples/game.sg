@@ -1,0 +1,15 @@
+func not(a) {
+    return a == false
+}
+
+func isequal(a, b){
+    return a == b
+}
+
+var a = "12"
+var b = input("What is your answer: ")
+while not(isequal(a,b)) {
+    print("You've guessed wrong")
+    var b = input("It is wrong think again: ")
+}
+print("You've guessed right")

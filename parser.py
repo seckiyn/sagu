@@ -289,7 +289,7 @@ class Parser:
                 TokenType.WORD,
                 TokenType.STRING_LITERAL)
         if self.current_token.token_type in expr:
-            function_variables.append(self.expr())
+            function_variables.append(self.logical())
         while self.current_token.token_type == TokenType.SEP:
             self.eat(TokenType.SEP)
             function_variables.append(self.expr())
